@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path,include 
 from Pih_poh_app.views import HomeView,SignupListView,SignupCreateView,LoginAPIView,DanceLevelListView, DanceLevelCreateView, DanceLevelUpdateView, DanceLevelDeleteView,InterestLevelListView, InterestLevelCreateView, InterestLevelUpdateView,InterestLevelDeleteView,StyleLevelListView, StyleLevelCreateView, StyleLevelUpdateView, StyleLevelDeleteView,GetUserInterest, PostUserInterest, PutUserInterest, DeleteUserInterest , UserProfileView, UpdateUserProfileView,UploadProfilePictureView, ChangePasswordView,DeleteAccountView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 urlpatterns = [
@@ -77,6 +77,16 @@ urlpatterns = [
     path('profile/change-password/<int:id>/', ChangePasswordView.as_view(), name='change-password'),
 
     path('profile/delete-account/<int:id>/', DeleteAccountView.as_view(), name='delete-account'),
+
+    # Auth URLs
+
+    path('auth/', include('dj_rest_auth.urls')),  # REST auth endpoints
+    path('auth/social/', include('allauth.socialaccount.urls')),  # Social auth endpoints
+
+    # Add Django allauth authentication URLs
+
+    path('accounts/', include('allauth.urls')),  # This adds the missing `/accounts/login/`
+    # http://127.0.0.1:8000/accounts/google/login/
 
 
 ]
