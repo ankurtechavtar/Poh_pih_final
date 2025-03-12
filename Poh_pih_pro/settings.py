@@ -154,19 +154,35 @@ REST_FRAMEWORK = {
 }
 
 
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
-    }
-}
+# SOCIALACCOUNT_PROVIDERS = {
+#     'google': {
+#         'SCOPE': ['profile', 'email'],
+#         'AUTH_PARAMS': {'access_type': 'online'},
+#     }
+# }
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['profile', 'email']
+SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {'access_type': 'online'}
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+        'OAUTH2_CALLBACK_URL': 'http://127.0.0.1:8000/accounts/google/login/callback/',
+    }
+}
+
 
 LOGIN_REDIRECT_URL = "home"  
 LOGOUT_REDIRECT_URL = "home"
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
-
+import os
+if os.getenv('DJANGO_ENV') == 'production':
+    SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = "https://poh-pih.onrender.com/accounts/google/login/callback/"
+    SOCIALACCOUNT_PROVIDERS['google']['OAUTH2_CALLBACK_URL'] = "https://poh-pih.onrender.com/accounts/google/login/callback/"
+else:
+    SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = "http://127.0.0.1:8000/accounts/google/login/callback/"
+    SOCIALACCOUNT_PROVIDERS['google']['OAUTH2_CALLBACK_URL'] = "http://127.0.0.1:8000/accounts/google/login/callback/"
