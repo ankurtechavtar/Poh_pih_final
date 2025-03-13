@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include 
-from Pih_poh_app.views import HomeView,SignupListView,SignupCreateView,LoginAPIView,DanceLevelListView, DanceLevelCreateView, DanceLevelUpdateView, DanceLevelDeleteView,InterestLevelListView, InterestLevelCreateView, InterestLevelUpdateView,InterestLevelDeleteView,StyleLevelListView, StyleLevelCreateView, StyleLevelUpdateView, StyleLevelDeleteView,GetUserInterest, PostUserInterest, PutUserInterest, DeleteUserInterest , UserProfileView, UpdateUserProfileView,UploadProfilePictureView, ChangePasswordView,DeleteAccountView
+from Pih_poh_app.views import HomeView,SignupListView,SignupCreateView,LoginAPIView,DanceLevelListView, DanceLevelCreateView, DanceLevelUpdateView, DanceLevelDeleteView,InterestLevelListView, InterestLevelCreateView, InterestLevelUpdateView,InterestLevelDeleteView,StyleLevelListView, StyleLevelCreateView, StyleLevelUpdateView, StyleLevelDeleteView,GetUserInterest, PostUserInterest, PutUserInterest, DeleteUserInterest , UserProfileView, UpdateUserProfileView,UploadProfilePictureView, ChangePasswordView,DeleteAccountView,facebook_login
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -86,7 +86,13 @@ urlpatterns = [
     # Add Django allauth authentication URLs
 
     path('accounts/', include('allauth.urls')),  # This adds the missing `/accounts/login/`
+    path('auth/', include('social_django.urls', namespace='social')),
+    path('facebook-login/', facebook_login, name='facebook_login'),
     # http://127.0.0.1:8000/accounts/google/login/
+    # http://127.0.0.1:8000/accounts/facebook/login/
+    #https://poh-pih.onrender.com/accounts/facebook/login/
+
+    # https://dashboard.render.com/web/srv-cv8oegin91rc738llg00/deploys/dep-cv8sae1c1ekc7382murg
 
 
 ]

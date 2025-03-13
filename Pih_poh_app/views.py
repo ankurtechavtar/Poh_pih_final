@@ -213,6 +213,29 @@ class DeleteAccountView(generics.DestroyAPIView):
 
 
 
+import requests
+from django.contrib.auth.models import User
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+
+@api_view(['POST'])
+def facebook_login(request):
+    access_token = request.data.get('access_token')
+    fb_url = f'https://graph.facebook.com/me?fields=id,name,email&access_token={access_token}'
+    fb_response = requests.get(fb_url)
+    data = fb_response.json()
+
+    if 'error' in data:
+        return Response({'error': 'Invalid Facebook token'}, status=400)
+
+    email = data.get('email')
+    name = data.get('name')
+
+    user, created = User.objects.get_or_create(username=email, defaults={'email': email, 'first_name': name})
+    token, _ = Token.objects.get_or_create(user=user)
+
+    return Response({'token': token.key, 'user': user.username})
 
 
 # render url:-

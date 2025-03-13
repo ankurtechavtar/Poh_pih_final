@@ -24,9 +24,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-5mwk%7a)q=a8#yvk6j1lt+%9^czzfv(=byxdz)(pgl!natxf+e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG =False
 
-ALLOWED_HOSTS = ['poh-pih.onrender.com','127.0.0.1']
+# ALLOWED_HOSTS = ['poh-pih.onrender.com','127.0.0.1']
+ALLOWED_HOSTS = [
+    '127.0.0.1',                    # for local development
+    'localhost',                   # optional fallback for local
+    'poh-pih.onrender.com',        # production domain
+    'a825-103-16-69-194.ngrok-free.app'  # ngrok domain for local testing
+]
+
 
 
 # Application definition
@@ -53,6 +60,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
+    'social_django',
 
 ]
 
@@ -122,7 +131,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
-SITE_ID = 2
+# SITE_ID=2
+SITE_ID=1
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -144,13 +154,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',  # Default authentication
-    'allauth.account.auth_backends.AuthenticationBackend',  # Allauth authentication
+    'allauth.account.auth_backends.AuthenticationBackend', 
+    'social_core.backends.facebook.FacebookOAuth2', # Allauth authentication
 )
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # Use JWT for authentication
     ),
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
 }
 
 
@@ -174,6 +192,16 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+# Facebook keys from developer console
+SOCIAL_AUTH_FACEBOOK_KEY = config('SOCIAL_AUTH_FACEBOOK_KEY')
+SOCIAL_AUTH_FACEBOOK_SECRET = config('SOCIAL_AUTH_FACEBOOK_SECRET')
+
+# Optional - to fetch email
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+    'fields': 'id, name, email'
+}
+
 
 LOGIN_REDIRECT_URL = "home"  
 LOGOUT_REDIRECT_URL = "home"
@@ -186,3 +214,32 @@ if os.getenv('DJANGO_ENV') == 'production':
 else:
     SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = "http://127.0.0.1:8000/accounts/google/login/callback/"
     SOCIALACCOUNT_PROVIDERS['google']['OAUTH2_CALLBACK_URL'] = "http://127.0.0.1:8000/accounts/google/login/callback/"
+
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    'facebook': {
+        'METHOD': 'oauth2',
+        'SDK_URL': 'https://connect.facebook.net/en_US/sdk.js',
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'INIT_PARAMS': {'cookie': True},
+        'FIELDS': [
+            'id',
+            'email',
+            'name',
+            'first_name',
+            'last_name',
+            'verified',
+            'locale',
+            'timezone',
+            'link',
+            'gender',
+            'updated_time',
+        ],
+        'EXCHANGE_TOKEN': True,
+        'LOCALE_FUNC': lambda request: 'en_US',
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v8.0',
+    }
+}
