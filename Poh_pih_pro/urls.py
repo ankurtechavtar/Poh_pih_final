@@ -18,12 +18,15 @@ from django.contrib import admin
 from django.urls import path,include 
 from Pih_poh_app.views import HomeView,SignupListView,SignupCreateView,LoginAPIView,DanceLevelListView, DanceLevelCreateView, DanceLevelUpdateView, DanceLevelDeleteView,InterestLevelListView, InterestLevelCreateView, InterestLevelUpdateView,InterestLevelDeleteView,StyleLevelListView, StyleLevelCreateView, StyleLevelUpdateView, StyleLevelDeleteView,GetUserInterest, PostUserInterest, PutUserInterest, DeleteUserInterest , UserProfileView, UpdateUserProfileView,UploadProfilePictureView, ChangePasswordView,DeleteAccountView,facebook_login
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.views.generic import TemplateView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("",HomeView.as_view(),name="home"),
     # Signup & Login APIs
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('privacy-policy/', TemplateView.as_view(template_name='privacy_policy.html'), name='privacy_policy'),
+    path('delete-my-data/', TemplateView.as_view(template_name='delete_my_data.html')),
 
     path('get/signup/', SignupListView.as_view(), name='signup-list'),
 
