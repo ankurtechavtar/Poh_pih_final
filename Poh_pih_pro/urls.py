@@ -16,23 +16,29 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include 
-from Pih_poh_app.views import HomeView,SignupListView,SignupCreateView,LoginAPIView,DanceLevelListView, DanceLevelCreateView, DanceLevelUpdateView, DanceLevelDeleteView,InterestLevelListView, InterestLevelCreateView, InterestLevelUpdateView,InterestLevelDeleteView,StyleLevelListView, StyleLevelCreateView, StyleLevelUpdateView, StyleLevelDeleteView,GetUserInterest, PostUserInterest, PutUserInterest, DeleteUserInterest , UserProfileView, UpdateUserProfileView,UploadProfilePictureView, ChangePasswordView,DeleteAccountView,facebook_login
+from Pih_poh_app.views import HomeView,SignupListView,SignupCreateView,LoginAPIView,DanceLevelListView, DanceLevelCreateView, DanceLevelUpdateView, DanceLevelDeleteView,InterestLevelListView, InterestLevelCreateView, InterestLevelUpdateView,InterestLevelDeleteView,StyleLevelListView, StyleLevelCreateView, StyleLevelUpdateView, StyleLevelDeleteView,GetUserInterest, PostUserInterest, PutUserInterest, DeleteUserInterest , UserProfileView, UpdateUserProfileView,UploadProfilePictureView, ChangePasswordView,DeleteAccountView,facebook_login,SubscriptionPlanListView, MySubscriptionView, UpdateUserSubscriptionView,CreateSubscription,CreatePaymentIntent, PaymentStatusView, RefundPaymentView,CancelSubscriptionView,MyPaymentsView, UsageTrackingView,CheckVideoLimitView
+
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.views.generic import TemplateView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("",HomeView.as_view(),name="home"),
-    # Signup & Login APIs
+    
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('privacy-policy/', TemplateView.as_view(template_name='privacy_policy.html'), name='privacy_policy'),
     path('delete-my-data/', TemplateView.as_view(template_name='delete_my_data.html')),
+
+    # Signup & Login APIs
 
     path('get/signup/', SignupListView.as_view(), name='signup-list'),
 
     path('post/signup/', SignupCreateView.as_view(), name='signup-create'),
 
     path('post/login/', LoginAPIView.as_view(), name='login'),
+
+    #Dancelevel 
 
     path('GetDancelevel/', DanceLevelListView.as_view(), name='DanceLevel-list'),
     
@@ -90,12 +96,37 @@ urlpatterns = [
 
     path('accounts/', include('allauth.urls')),  # This adds the missing `/accounts/login/`
     path('auth/', include('social_django.urls', namespace='social')),
+
     path('facebook-login/', facebook_login, name='facebook_login'),
+
     # http://127.0.0.1:8000/accounts/google/login/
     # http://127.0.0.1:8000/accounts/facebook/login/
     #https://poh-pih.onrender.com/accounts/facebook/login/
-
     # https://dashboard.render.com/web/srv-cv8oegin91rc738llg00/deploys/dep-cv8sae1c1ekc7382murg
+
+    # payment and subscription related urls 
+
+    path('plans/', SubscriptionPlanListView.as_view()),
+
+    path('my-subscription/', MySubscriptionView.as_view()),
+
+    path('update-subscription/', UpdateUserSubscriptionView.as_view()),
+
+    path('create-subscription/', CreateSubscription.as_view()),
+
+    path('create-payment-intent/', CreatePaymentIntent.as_view()),
+
+    path('payment-status/<str:payment_intent_id>/', PaymentStatusView.as_view()),
+
+    path('refund-payment/<str:payment_intent_id>/', RefundPaymentView.as_view()),
+
+    path('cancel-subscription/', CancelSubscriptionView.as_view()),
+
+    path('list-my-payments/', MyPaymentsView.as_view()),
+    
+    path('usage-tracking/', UsageTrackingView.as_view()),
+
+    path('check-video-limit/', CheckVideoLimitView.as_view()),
 
 
 ]

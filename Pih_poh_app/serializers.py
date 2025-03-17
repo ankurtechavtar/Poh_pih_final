@@ -114,3 +114,28 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True)
 
 
+# payment and subscription related serializers 
+
+from rest_framework import serializers
+from .models import SubscriptionPlan, UserSubscription, Payment, UsageTracking
+
+class SubscriptionPlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubscriptionPlan
+        fields = '__all__'
+
+class UserSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSubscription
+        fields = '__all__'
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = '__all__'
+
+class UsageTrackingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UsageTracking
+        fields = '__all__'
+
