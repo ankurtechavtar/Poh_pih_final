@@ -132,7 +132,7 @@ class Payment(models.Model):
     is_active = models.BooleanField(default=True)
 
     # For one-time payment transactions (if applicable)
-    payment_intent_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
+    payment_intent_id = models.CharField(max_length=255, unique=True, blank=True, null=True) 
     client_secret = models.CharField(max_length=255, blank=True, null=True)
     amount = models.IntegerField(blank=True, null=True)
     currency = models.CharField(max_length=10, default='usd')
@@ -153,4 +153,25 @@ class Payment(models.Model):
             models.Index(fields=['payment_intent_id']),
         ]
 
+# from django.db import models
+# from django.conf import settings
 
+# class PasswordResetToken(models.Model):
+#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+#     token = models.CharField(max_length=255)
+#     created_at = models.DateTimeField(auto_now_add=True)
+
+
+# from django.contrib.auth.models import User
+import random
+from django.conf import settings
+from django.db import models
+
+class PasswordResetOTP(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @staticmethod
+    def generate_otp():
+        return str(random.randint(100000, 999999))

@@ -16,10 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include 
-from Pih_poh_app.views import HomeView,SignupListView,SignupCreateView,LoginAPIView,DanceLevelListView, DanceLevelCreateView, DanceLevelUpdateView, DanceLevelDeleteView,InterestLevelListView, InterestLevelCreateView, InterestLevelUpdateView,InterestLevelDeleteView,StyleLevelListView, StyleLevelCreateView, StyleLevelUpdateView, StyleLevelDeleteView,GetUserInterest, PostUserInterest, PutUserInterest, DeleteUserInterest , UserProfileView, UpdateUserProfileView,UploadProfilePictureView, ChangePasswordView,DeleteAccountView,facebook_login,SubscriptionPlanListView, MySubscriptionView, UpdateUserSubscriptionView,CreateSubscription,CreatePaymentIntent, PaymentStatusView, RefundPaymentView,CancelSubscriptionView,MyPaymentsView, UsageTrackingView,CheckVideoLimitView
+from django.conf import settings
+from django.conf.urls.static import static
+from Pih_poh_app.views import HomeView,SignupListView,SignupCreateView,LoginAPIView,DanceLevelListView, DanceLevelCreateView, DanceLevelUpdateView, DanceLevelDeleteView,InterestLevelListView, InterestLevelCreateView, InterestLevelUpdateView,InterestLevelDeleteView,StyleLevelListView, StyleLevelCreateView, StyleLevelUpdateView, StyleLevelDeleteView,GetUserInterest, PostUserInterest, PutUserInterest, DeleteUserInterest , UserProfileView,CreateProfilePictureView, UpdateUserProfileView,UpdateProfilePictureView, ChangePasswordView,DeleteAccountView,facebook_login,SubscriptionPlanListView, MySubscriptionView, UpdateUserSubscriptionView,CreateSubscription,CreatePaymentIntent, PaymentStatusView, RefundPaymentView,CancelSubscriptionView,MyPaymentsView, UsageTrackingView,CheckVideoLimitView,GoogleLoginView,ForgotPasswordView,ResetPasswordView,LogoutAPIView
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.views.generic import TemplateView
+from dj_rest_auth.registration.views import SocialLoginView
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -81,7 +87,13 @@ urlpatterns = [
 
     path('profile/update/<int:id>/', UpdateUserProfileView.as_view(), name='update-profile'),
 
-    path('profile/upload-picture/<int:id>/', UploadProfilePictureView.as_view(), name='upload-profile-picture'),
+    # path('profile/upload-picture/<int:id>/', UploadProfilePictureView.as_view(), name='upload-profile-picture'),
+
+    # Create profile picture (for first-time uploads)
+    path('profile/upload-picture/<int:id>/', CreateProfilePictureView.as_view(), name='create-profile-picture'),
+    
+    # Update profile picture (for existing users)
+    path('profile/update-picture/<int:id>/', UpdateProfilePictureView.as_view(), name='upload-profile-picture'),
 
     path('profile/change-password/<int:id>/', ChangePasswordView.as_view(), name='change-password'),
 
@@ -91,13 +103,16 @@ urlpatterns = [
 
     path('auth/', include('dj_rest_auth.urls')),  # REST auth endpoints
     path('auth/social/', include('allauth.socialaccount.urls')),  # Social auth endpoints
-
     # Add Django allauth authentication URLs
-
     path('accounts/', include('allauth.urls')),  # This adds the missing `/accounts/login/`
     path('auth/', include('social_django.urls', namespace='social')),
 
     path('facebook-login/', facebook_login, name='facebook_login'),
+# new login google endpoint
+    path('auth/google/', GoogleLogin.as_view(), name='google_login'),
+    path('auth/', include('dj_rest_auth.urls')),  # Includes login/logout endpoints
+    path('auth/registration/', include('dj_rest_auth.registration.urls')),  # Includes signup
+    path('auth/google/token/', GoogleLoginView.as_view(), name='google_login_token'),
 
     # http://127.0.0.1:8000/accounts/google/login/
     # http://127.0.0.1:8000/accounts/facebook/login/
@@ -128,6 +143,14 @@ urlpatterns = [
 
     path('check-video-limit/', CheckVideoLimitView.as_view()),
 
+    path('forgot-password/', ForgotPasswordView.as_view(), name='forgot_password'),
+
+    # path('reset-password/<str:token>/', ResetPasswordView.as_view(), name='reset_password'),
+     path('reset-password/', ResetPasswordView.as_view(), name='reset_password'),
+
+    path('logout/', LogoutAPIView.as_view(), name='logout'),
+
 
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

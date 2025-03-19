@@ -139,3 +139,35 @@ class UsageTrackingSerializer(serializers.ModelSerializer):
         model = UsageTracking
         fields = '__all__'
 
+
+# forgot password
+# from rest_framework import serializers
+# from django.contrib.auth import get_user_model
+
+# class ForgotPasswordSerializer(serializers.Serializer):
+#     email = serializers.EmailField()
+
+#     def validate_email(self, value):
+#         try:
+#             user = get_user_model().objects.get(email=value)
+#         except get_user_model().DoesNotExist:
+#             raise serializers.ValidationError("Email not found.")
+#         return value
+
+
+from rest_framework import serializers
+from django.contrib.auth import get_user_model 
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        User = get_user_model()
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email not found.")
+        return value
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=6)
+    new_password = serializers.CharField(write_only=True)

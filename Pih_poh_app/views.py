@@ -148,11 +148,44 @@ class UpdateUserProfileView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
     lookup_field = "id"
 
-class UploadProfilePictureView(generics.UpdateAPIView):
+# class UploadProfilePictureView(generics.UpdateAPIView):
+#     queryset = CustomUser.objects.all()
+#     serializer_class = UploadProfilePictureSerializer
+#     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+#     lookup_field = "id"
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from .models import CustomUser
+from .serializers import UploadProfilePictureSerializer
+from .permissions import IsOwnerOrAdmin
+
+class CreateProfilePictureView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UploadProfilePictureSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]  # Ensure the user is authenticated and authorized
+    lookup_field = 'id'
+
+    # def perform_create(self, serializer):
+    #     user = self.request.user  # Get the currently logged-in user
+    #     # Save the profile picture for the logged-in user
+    #     serializer.save(user=user)  # Save the profile picture and associate with the logged-in user
+
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from .models import CustomUser
+from .serializers import UploadProfilePictureSerializer
+from .permissions import IsOwnerOrAdmin  # Ensure this is defined in your project
+
+class UpdateProfilePictureView(generics.UpdateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = UploadProfilePictureSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]  # Allow only authenticated and authorized users
     lookup_field = "id"
+
+    # def perform_update(self, serializer):
+    #     user = self.request.user
+    #     serializer.save(user=user)  # Associate the profile picture with the logged-in user
+
 
 class ChangePasswordView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
@@ -181,6 +214,88 @@ class DeleteAccountView(generics.DestroyAPIView):
         user = self.get_object()
         user.delete()
         return Response({"message": "Your account has been deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+class LogoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            # Perform logout by invalidating the token
+            request.auth.delete()  # Delete the token to log out
+            return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+        except AttributeError:
+            return Response({"message": "Already logged out"}, status=status.HTTP_400_BAD_REQUEST)
+# from dj_rest_auth.views import LoginView
+# from rest_framework.response import Response
+# from rest_framework_simplejwt.tokens import RefreshToken
+# from allauth.socialaccount.models import SocialAccount
+
+# class GoogleLoginView(LoginView):
+#     def post(self, request, *args, **kwargs):
+#         # Call default login view logic
+#         response = super().post(request, *args, **kwargs)
+
+#         # Get the logged-in user
+#         user = self.request.user
+
+#         # Generate JWT tokens
+#         refresh = RefreshToken.for_user(user)
+#         access_token = str(refresh.access_token)
+
+#         # Return JWT token along with default response
+#         return Response({
+#             "user": {
+#                 "id": user.id,
+#                 "email": user.email,
+#                 "username": user.username
+#             },
+#             "access_token": access_token,
+#             "refresh_token": str(refresh)
+#         })
+
+import google.auth.transport.requests
+import google.oauth2.id_token
+from django.contrib.auth.models import User
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+
+class GoogleLoginView(APIView):
+    def post(self, request):
+        try:
+            # Get the access token from request
+            access_token = request.data.get("access_token")
+            if not access_token:
+                return Response({"error": "Access token is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Verify Google ID Token
+            google_request = google.auth.transport.requests.Request()
+            decoded_token = google.oauth2.id_token.verify_oauth2_token(access_token, google_request)
+
+            if not decoded_token:
+                return Response({"error": "Invalid Google access token"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Extract user information from Google token
+            email = decoded_token.get("email")
+            first_name = decoded_token.get("given_name", "")
+            last_name = decoded_token.get("family_name", "")
+
+            if not email:
+                return Response({"error": "Google token missing email"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if user already exists, else create one
+            user, created = User.objects.get_or_create(email=email, defaults={"username": email, "first_name": first_name, "last_name": last_name})
+
+            # Generate JWT token
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "access_token": str(refresh.access_token),
+                "refresh_token": str(refresh)
+            })
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 # login with facebook api view 
 
@@ -487,6 +602,160 @@ class CheckVideoLimitView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=500)
 
+# forgot password
+
+# from rest_framework import status
+# from rest_framework.response import Response
+# from rest_framework.views import APIView
+# from django.core.mail import send_mail
+# from django.contrib.auth import get_user_model
+# from .serializers import ForgotPasswordSerializer
+# from .models import PasswordResetToken
+# import random
+# import string
+
+# class ForgotPasswordView(APIView):
+#     def post(self, request):
+#         serializer = ForgotPasswordSerializer(data=request.data)
+
+#         if serializer.is_valid():
+#             email = serializer.validated_data['email']
+#             try:
+#                 # Check if the user exists using get_user_model()
+#                 user = get_user_model().objects.get(email=email)
+
+#                 # Generate a random password reset token
+#                 token = ''.join(random.choices(string.ascii_letters + string.digits, k=20))
+
+#                 # Save the token to the PasswordResetToken model
+#                 PasswordResetToken.objects.create(user=user, token=token)
+
+#                 # Send email with the token link (you should configure an email backend)
+#                 reset_link = f"http://127.0.0.1:8000/reset-password/{token}/"
+
+#                 send_mail(
+#                     'Password Reset Request',
+#                     f'Click the link to reset your password: {reset_link}',
+#                     'no-reply@yourdomain.com',
+#                     [email],
+#                     fail_silently=False,
+#                 )
+
+#                 return Response({"message": "Password reset link sent."}, status=status.HTTP_200_OK)
+
+#             except get_user_model().DoesNotExist:
+#                 return Response({"error": "Email not found."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# from django.shortcuts import render, redirect
+# from django.http import HttpResponse
+# from django.contrib.auth import get_user_model
+# from django.contrib.auth.forms import PasswordResetForm
+# from .models import PasswordResetToken
+# from django.contrib.auth import update_session_auth_hash
+
+# class ResetPasswordView(APIView):
+#     def get(self, request, token):
+#         try:
+#             # Validate the token
+#             reset_token = PasswordResetToken.objects.get(token=token)
+
+#             # Check if the token is valid, if expired or used, redirect accordingly.
+#             # Here, we assume the token is valid if it's in the DB (you can add expiration logic if needed)
+#             user = reset_token.user
+
+#             # Pass the user object to the template to display a password reset form
+#             return render(request, 'reset_password.html', {'token': token, 'user': user})
+
+#         except PasswordResetToken.DoesNotExist:
+#             return HttpResponse("Invalid token or token expired.")
+
+#     def post(self, request, token):
+#         try:
+#             # Find the token
+#             reset_token = PasswordResetToken.objects.get(token=token)
+
+#             # Get user from the token
+#             user = reset_token.user
+
+#             # Ensure the user submits a valid password (you can use Django's PasswordChangeForm here)
+#             password = request.data.get('password')  # This can come from a form
+
+#             # Set the new password for the user
+#             user.set_password(password)
+#             user.save()
+
+#             # Delete the reset token to prevent re-use
+#             reset_token.delete()
+
+#             return HttpResponse("Password has been successfully reset.")
+
+#         except PasswordResetToken.DoesNotExist:
+#             return HttpResponse("Invalid token or token expired.")
+
+
+from django.core.mail import send_mail
+from django.utils.timezone import now
+from datetime import timedelta
+from django.contrib.auth import get_user_model
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+from .models import PasswordResetOTP
+from .serializers import ForgotPasswordSerializer, ResetPasswordSerializer
+
+User = get_user_model()
+
+class ForgotPasswordView(APIView):
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            user = User.objects.get(email=email)
+
+            # Generate OTP and store it
+            generated_otp = PasswordResetOTP.generate_otp()
+            PasswordResetOTP.objects.create(user=user, otp=generated_otp)
+
+            # Send OTP to email
+            send_mail(
+                "Password Reset OTP",
+                f"Your OTP for password reset is {generated_otp}.",
+                "your-email@gmail.com",
+                [email],
+                fail_silently=False,
+            )
+
+            return Response({"message": "OTP sent to email"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ResetPasswordView(APIView):
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            otp = serializer.validated_data['otp']
+            new_password = serializer.validated_data['new_password']
+
+            try:
+                user = User.objects.get(email=email)
+                otp_record = PasswordResetOTP.objects.filter(
+                    user=user, otp=otp, created_at__gte=now() - timedelta(minutes=10)
+                ).first()
+
+                if otp_record:
+                    user.set_password(new_password)
+                    user.save()
+                    otp_record.delete()  # Delete OTP after use
+                    return Response({"message": "Password reset successful"}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "Invalid or expired OTP"}, status=status.HTTP_400_BAD_REQUEST)
+            except User.DoesNotExist:
+                return Response({"error": "Email not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # render url:-
 # https://dashboard.render.com/web/srv-cv5us27noe9s73boee10/deploys/dep-cv61thvnoe9s73bppn20

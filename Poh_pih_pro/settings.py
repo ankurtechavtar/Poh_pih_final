@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
+from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-5mwk%7a)q=a8#yvk6j1lt+%9^czzfv(=byxdz)(pgl!natxf+e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG =False
+DEBUG =False 
 
 # ALLOWED_HOSTS = ['poh-pih.onrender.com','127.0.0.1']
 ALLOWED_HOSTS = [
@@ -62,6 +64,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
     'social_django',
+
+    
 
 ]
 
@@ -157,6 +161,10 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend', 
     'social_core.backends.facebook.FacebookOAuth2', # Allauth authentication
 )
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
 
 
 REST_FRAMEWORK = {
@@ -166,6 +174,11 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PERMISSION_CLASSES': (
     #     'rest_framework.permissions.IsAuthenticated',
     # ),
+}
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # Set token expiration time
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 # REST_FRAMEWORK = {
@@ -197,7 +210,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'OAUTH2_CALLBACK_URL': 'http://127.0.0.1:8000/accounts/google/login/callback/',
     }
 }
-
+REST_USE_JWT = True
 # Facebook keys from developer console
 SOCIAL_AUTH_FACEBOOK_KEY = config('SOCIAL_AUTH_FACEBOOK_KEY')
 SOCIAL_AUTH_FACEBOOK_SECRET = config('SOCIAL_AUTH_FACEBOOK_SECRET')
@@ -249,3 +262,16 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERSION': 'v8.0',
     }
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Use your SMTP provider
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+# Directory where media files will be stored on the server
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# URL used to access media files
+MEDIA_URL = '/media/'
