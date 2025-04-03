@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-5mwk%7a)q=a8#yvk6j1lt+%9^czzfv(=byxdz)(pgl!natxf+e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG =False 
+DEBUG =True 
 
 # ALLOWED_HOSTS = ['poh-pih.onrender.com','127.0.0.1']
 ALLOWED_HOSTS = [
@@ -169,6 +169,7 @@ AUTHENTICATION_BACKENDS = (
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     # 'DEFAULT_PERMISSION_CLASSES': (
@@ -187,7 +188,9 @@ SIMPLE_JWT = {
 #     ]
 # }
 
-
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React app URL
+]
 # SOCIALACCOUNT_PROVIDERS = {
 #     'google': {
 #         'SCOPE': ['profile', 'email'],
@@ -207,7 +210,7 @@ SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
-        'OAUTH2_CALLBACK_URL': 'http://127.0.0.1:8000/accounts/google/login/callback/',
+        'OAUTH2_CALLBACK_URL': 'http://127.0.0.1:8000/accounts/google/login/callback',
     }
 }
 REST_USE_JWT = True
@@ -222,17 +225,19 @@ SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
 }
 
 
-LOGIN_REDIRECT_URL = "home"  
+LOGIN_REDIRECT_URL = "/auth/get-token/" 
+# LOGIN_REDIRECT_URL="home"
 LOGOUT_REDIRECT_URL = "home"
+
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 import os
 if os.getenv('DJANGO_ENV') == 'production':
-    SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = "https://poh-pih.onrender.com/accounts/google/login/callback/"
-    SOCIALACCOUNT_PROVIDERS['google']['OAUTH2_CALLBACK_URL'] = "https://poh-pih.onrender.com/accounts/google/login/callback/"
+    SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = "https://poh-pih.onrender.com/accounts/google/login/callback"
+    SOCIALACCOUNT_PROVIDERS['google']['OAUTH2_CALLBACK_URL'] = "https://poh-pih.onrender.com/accounts/google/login/callback"
 else:
-    SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = "http://127.0.0.1:8000/accounts/google/login/callback/"
-    SOCIALACCOUNT_PROVIDERS['google']['OAUTH2_CALLBACK_URL'] = "http://127.0.0.1:8000/accounts/google/login/callback/"
+    SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = "http://127.0.0.1:8000/accounts/google/login/callback"
+    SOCIALACCOUNT_PROVIDERS['google']['OAUTH2_CALLBACK_URL'] = "http://127.0.0.1:8000/accounts/google/login/callback"
 
 
 

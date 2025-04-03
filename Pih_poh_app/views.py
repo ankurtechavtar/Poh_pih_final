@@ -56,6 +56,7 @@ class LoginAPIView(APIView):
             return Response({
                 "message": "Login successful",
                 "token": access_token,
+                "user_id": user.id,  # Add the user id to the response
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -148,6 +149,7 @@ class UpdateUserProfileView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
     lookup_field = "id"
 
+
 # class UploadProfilePictureView(generics.UpdateAPIView):
 #     queryset = CustomUser.objects.all()
 #     serializer_class = UploadProfilePictureSerializer
@@ -214,6 +216,28 @@ class DeleteAccountView(generics.DestroyAPIView):
         user = self.get_object()
         user.delete()
         return Response({"message": "Your account has been deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+
+class GetJWTTokenAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "name": user.first_name
+            }
+        })
 
 class LogoutAPIView(APIView):
     permission_classes = [IsAuthenticated]

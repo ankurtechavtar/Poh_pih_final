@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path,include 
 from django.conf import settings
 from django.conf.urls.static import static
-from Pih_poh_app.views import HomeView,SignupListView,SignupCreateView,LoginAPIView,DanceLevelListView, DanceLevelCreateView, DanceLevelUpdateView, DanceLevelDeleteView,InterestLevelListView, InterestLevelCreateView, InterestLevelUpdateView,InterestLevelDeleteView,StyleLevelListView, StyleLevelCreateView, StyleLevelUpdateView, StyleLevelDeleteView,GetUserInterest, PostUserInterest, PutUserInterest, DeleteUserInterest , UserProfileView,CreateProfilePictureView, UpdateUserProfileView,UpdateProfilePictureView, ChangePasswordView,DeleteAccountView,facebook_login,SubscriptionPlanListView, MySubscriptionView, UpdateUserSubscriptionView,CreateSubscription,CreatePaymentIntent, PaymentStatusView, RefundPaymentView,CancelSubscriptionView,MyPaymentsView, UsageTrackingView,CheckVideoLimitView,GoogleLoginView,ForgotPasswordView,ResetPasswordView,LogoutAPIView
+from Pih_poh_app.views import HomeView,SignupListView,SignupCreateView,LoginAPIView,DanceLevelListView, DanceLevelCreateView, DanceLevelUpdateView, DanceLevelDeleteView,InterestLevelListView, InterestLevelCreateView, InterestLevelUpdateView,InterestLevelDeleteView,StyleLevelListView, StyleLevelCreateView, StyleLevelUpdateView, StyleLevelDeleteView,GetUserInterest, PostUserInterest, PutUserInterest, DeleteUserInterest , UserProfileView,CreateProfilePictureView, UpdateUserProfileView,UpdateProfilePictureView, ChangePasswordView,DeleteAccountView,facebook_login,SubscriptionPlanListView, MySubscriptionView, UpdateUserSubscriptionView,CreateSubscription,CreatePaymentIntent, PaymentStatusView, RefundPaymentView,CancelSubscriptionView,MyPaymentsView, UsageTrackingView,CheckVideoLimitView,GoogleLoginView,ForgotPasswordView,ResetPasswordView,LogoutAPIView,GetJWTTokenAPIView
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.views.generic import TemplateView
@@ -113,11 +113,24 @@ urlpatterns = [
     path('auth/', include('dj_rest_auth.urls')),  # Includes login/logout endpoints
     path('auth/registration/', include('dj_rest_auth.registration.urls')),  # Includes signup
     path('auth/google/token/', GoogleLoginView.as_view(), name='google_login_token'),
+    # path('accounts/google/login/callback/', include('allauth.urls')),
+
+# https://accounts.google.com/o/oauth2/auth?client_id=962172872566-bqqcrj3krd12dp29loutui7gm0pn8855.apps.googleusercontent.com&redirect_uri=http://127.0.0.1:8000/accounts/google/login/callback&response_type=token&scope=email profile&access_type=offline
+# i need to create api in django so user can click on login button then they will redirect the googel page , then they can login with google and they can access website and after login one jwt token should be generated so using this token they can access profile 
+# https://accounts.google.com/o/oauth2/v2/auth?
+# client_id=962172872566-bqqcrj3krd12dp29loutui7gm0pn8855.apps.googleusercontent.com
+# &redirect_uri=http://127.0.0.1:8000/accounts/google/login/callback
+# &response_type=token
+# &scope=email profile openid
+# https://accounts.google.com/o/oauth2/v2/auth?client_id=962172872566-bqqcrj3krd12dp29loutui7gm0pn8855.apps.googleusercontent.com&redirect_uri=http://127.0.0.1:8000/accounts/google/login/callback&response_type=token&scope=email profile openid
+
+
 
     # http://127.0.0.1:8000/accounts/google/login/
     # http://127.0.0.1:8000/accounts/facebook/login/
     #https://poh-pih.onrender.com/accounts/facebook/login/
     # https://dashboard.render.com/web/srv-cv8oegin91rc738llg00/deploys/dep-cv8sae1c1ekc7382murg
+    
 
     # payment and subscription related urls 
 
@@ -146,9 +159,10 @@ urlpatterns = [
     path('forgot-password/', ForgotPasswordView.as_view(), name='forgot_password'),
 
     # path('reset-password/<str:token>/', ResetPasswordView.as_view(), name='reset_password'),
-     path('reset-password/', ResetPasswordView.as_view(), name='reset_password'),
+    path('reset-password/', ResetPasswordView.as_view(), name='reset_password'),
 
     path('logout/', LogoutAPIView.as_view(), name='logout'),
+    path('auth/get-token/', GetJWTTokenAPIView.as_view(), name='get-token'),
 
 
 ]
